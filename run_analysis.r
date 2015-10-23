@@ -40,7 +40,6 @@ read_test <- function(){
   return(test)  
 }
 
-
 rename_labels <- function(name){
   
   # Labels are renamed according to several simple rule:
@@ -48,6 +47,7 @@ rename_labels <- function(name){
   #1) Acc -> Acceleration
   
   replacements <- c(c("Acc", "Acceleration"),
+                    c("Gyro", "Gyroscope"),
                     c("Mag", "Magnitude"),
                     c("-mean()", "Mean"),
                     c("-std()", "Std"),
@@ -56,7 +56,6 @@ rename_labels <- function(name){
                     c("-Z", "Z"),
                     c("BodyBody", "Body"))
   
-  
   replacements_re <- c(c("^f", "Freq"),
                        c("^t", "Time"))
     
@@ -64,20 +63,14 @@ rename_labels <- function(name){
   dim(replacements_re) <- c(2, length(replacements_re)/2)
   
   for (i in seq(ncol(replacements))){
-    #print(paste(i,replacements[1, i],replacements[2, i]) )
     name <- gsub(replacements[1, i], replacements[2, i], name, fixed=T)  
-  for (i in seq(ncol(replacements_re))){
-    #print(paste(i,replacements[1, i],replacements[2, i]) )
-    name <- gsub(replacements_re[1, i], replacements_re[2, i], name, fixed=F)  
-  }
     
+  for (i in seq(ncol(replacements_re))){
+    name <- gsub(replacements_re[1, i], replacements_re[2, i], name, fixed=F)  
+  } 
   }
-  
   return(name)
-  
 }
-
-
 
 main <- function(){
   
@@ -104,20 +97,19 @@ main <- function(){
   activity_labels = read.table("UCI HAR Dataset/activity_labels.txt", stringsAsFactors = F )
   levels(data2$activity) <- activity_labels[,2]
   
-  
   # 4. Appropriately labels the data set with descriptive variable names. 
   names(data2) <- sapply(names(data2), rename_labels)
-  
   
   # 5. From the data set in step 4, creates a second, independent tidy data set with the 
   #average of each variable for each activity and each subject.
   #require(dplyr)
   
   meanset <- data2 %>% group_by(activity, subject) %>% summarise_each(funs(mean))
-  write.table(meanset, file="UCIHAR.csv", row.names=FALSE, sep=',' )
+  write.table(meanset, file="HARUS.txt", row.names=FALSE, sep=',' )
+  return(meanset)
   
 }
 
-
+main()
 
 
